@@ -24,11 +24,6 @@
     "apollo": "^2.34.0",
     "express": "^4.21.2",
     "path": "^0.12.7",
-    "react": "^19.0.0",
-    "react-bootstrap": "^2.10.9",
-    "react-router-dom": "^7.3.0"
-  },
-  "devDependencies": {
-    "@types/react-bootstrap": "^0.32.37"
+    "react-bootstrap": "^2.10.9"
   }
 }
