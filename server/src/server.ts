@@ -7,13 +7,10 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { authenticateToken } from './services/auth.js';
 import { typeDefs, resolvers } from './schemas/index.js';
 
-// import { typeDefs, resolvers } from './schemas/index.js'
-
-
-// const server = new ApolloServer({
-//   typeDefs,
-//   resolvers
-// });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers
+});
 
 const startApolloServer = async() => {
   await server.start();
@@ -25,11 +22,11 @@ const startApolloServer = async() => {
   app.use(express.urlencoded({ extended: false}));
   app.use(express.json());
 
-  // app.use('/graphql', expressMiddleware(server as any,
-  //   {
-  //     context: authenticateToken as any
-  //   }
-  // ));
+  app.use('/graphql', expressMiddleware(server as any,
+    {
+      context: authenticateToken as any
+    }
+  ));
 
   app.use(express.static(path.join(__dirname, '../../client/dist')))
 
@@ -42,3 +39,5 @@ const startApolloServer = async() => {
     console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
   });
 };
+
+startApolloServer();
