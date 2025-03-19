@@ -1,7 +1,7 @@
 import { Schema, model, type Document} from 'mongoose';
 import bcrypt from 'bcrypt';
 
-// import taskSchema, { type TaskDocument } from './tasks';
+import taskSchema, { type TaskDocument } from './tasks.ts';
 
 export interface UserDocument extends Document {
   id: string;
