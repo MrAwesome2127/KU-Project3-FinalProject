@@ -23,6 +23,7 @@
     "@types/mongoose": "^5.11.97",
     "apollo": "^2.34.0",
     "express": "^4.21.2",
+    "jwt-decode": "^4.0.0",
     "mongoose": "^8.12.1",
     "path": "^0.12.7",
     "react-bootstrap": "^2.10.9",
