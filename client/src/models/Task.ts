@@ -1,8 +1,5 @@
-export interface Book {
-  authors: string[],
+export interface Task {
+  duties: string[],
   description: string;
-  bookId: string;
-  image: string;
-  link: string;
-  title: string;
+  taskId: string;
 }
