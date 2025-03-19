@@ -1,5 +1,6 @@
 export interface Task {
-  duties: string[],
+  title: string;
   description: string;
+  stressLevel: string,
   taskId: string;
 }

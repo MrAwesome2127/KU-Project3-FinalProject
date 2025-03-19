@@ -30,10 +30,7 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: true,
     },
-
     savedTasks: [taskSchema],
-
-
   },
   {
     toJSON: {
