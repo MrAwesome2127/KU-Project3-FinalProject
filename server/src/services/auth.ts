@@ -9,6 +9,7 @@ interface JwtPayload {
   _id: unknown;
   username: string;
   email: string;
+  wife: boolean;
 }
 
 export const autheticateToken = (req: Request, res: Response, next: NextFunction) => {
@@ -32,8 +33,8 @@ export const autheticateToken = (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const signToken = (username: string, email: string, _id:unknown) => {
-  const payload = { username, email, _id };
+export const signToken = (username: string, email: string, _id:unknown, wife: boolean) => {
+  const payload = { username, email, _id, wife };
   const secretKey = process.env.JWT_SECRET_KEY || '';
 
   return jwt.sign(payload, secretKey, { expiresIn: '365d' }); //365 day expiration
