@@ -1,8 +1,8 @@
-import { Schema, type Document } from 'mongoose';
+import { Schema, model, type Document } from 'mongoose';
 
 export interface TaskDocument extends Document {
   taskId: string;
-  titles: string;
+  title: string;
   description: string;
   stressLevel: string;
 }
@@ -26,4 +26,7 @@ const taskSchema = new Schema<TaskDocument>({
   }
 });
 
-export default taskSchema;
+const Task = model<TaskDocument>('Thought', taskSchema);
+
+
+export default Task;

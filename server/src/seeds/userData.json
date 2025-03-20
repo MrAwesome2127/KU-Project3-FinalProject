@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "username": "HusbandTim",
+    "email": "Tim@husband.com",
+    "password": "password",
+    "tasks": []
+  },
+  {
+    "id": "2",
+    "username": "HusbandNathan",
+    "email": "Nathan@husband.com",
+    "password": "password",
+    "tasks": []
+  },
+  {
+    "id": "3",
+    "username": "HusbandRyan",
+    "email": "Ryan@husband.com",
+    "password": "password",
+    "tasks": []
+  }
+]
