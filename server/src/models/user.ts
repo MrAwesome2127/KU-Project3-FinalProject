@@ -10,7 +10,7 @@ export interface UserDocument extends Document {
   password: string;
   savedTasks: TaskDocument[];
   isCorrectPassword(password: string): Promise<boolean>;
-  bookCount: number;
+  taskCount: number;
 }
 
 const userSchema = new Schema<UserDocument>(
@@ -30,7 +30,11 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: true,
     },
-    savedTasks: [taskSchema],
+    savedTasks:  [{
+      type: Schema.Types.ObjectId,
+      ref: 'Task',
+      },
+    ],
   },
   {
     toJSON: {
