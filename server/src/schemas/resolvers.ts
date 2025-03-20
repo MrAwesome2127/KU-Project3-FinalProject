@@ -1,5 +1,5 @@
 import User, { UserDocument } from '../models/User';
-import Tasks, {TaskDocument} from '../models/Task'
+import Tasks, {TaskDocument} from '../models/task'
 import { signToken } from '../services/auth';
 
 // interface Profile {

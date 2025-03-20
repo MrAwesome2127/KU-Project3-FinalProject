@@ -1,7 +1,7 @@
 import { Schema, model, type Document} from 'mongoose';
 import bcrypt from 'bcrypt';
 
-import taskSchema, { type TaskDocument } from './Task.ts';
+import taskSchema, { type TaskDocument } from './task.ts';
 
 export interface UserDocument extends Document {
   id: string;
@@ -14,6 +14,7 @@ export interface UserDocument extends Document {
   isPasswordWife(password: string): Promise<boolean>;
 
   bookCount: number;
+  taskCount: number;
 }
 
 const userSchema = new Schema<UserDocument>(
@@ -44,7 +45,11 @@ const userSchema = new Schema<UserDocument>(
       minlength: 8,
     },
 
-    savedTasks: [taskSchema],
+    savedTasks:  [{
+      type: Schema.Types.ObjectId,
+      ref: 'Task',
+      },
+    ],
   },
   {
     toJSON: {
