@@ -1,26 +1,9 @@
 import User, { UserDocument } from '../models/User';
-import Tasks, {TaskDocument} from '../models/Task'
+import Task, {TaskDocument} from '../models/Task'
 import { signToken } from '../services/auth';
 
-// interface Profile {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   password: string;
-//   skills: string[];
-// }
-
-// interface AddSkillArgs {
-//   profileId: string;
-//   skill: string;
-// }
-
-// interface RemoveSkillArgs {
-//   profileId: string;
-//   skill: string;
-// }
-
 interface User{
+  _id: string;
   username: string;
   email: string;
   password: string;
@@ -40,6 +23,7 @@ interface AddUserArgs {
 }
 
 interface Task {
+  _id: string;
   title: string;
   description: string;
   stressLevel: string,
@@ -54,6 +38,20 @@ interface Context {
   user?: User;
 }
 
+interface AddTaskArgs {
+  userId: string;
+  task: string;
+}
+
+interface UpdateTaskArgs {
+  userId: string;
+  task: string;
+}
+
+interface RemoveTaskArgs {
+  userId: string;
+  task: string;
+}
 
 const resolvers = {
   Query: {
@@ -73,33 +71,30 @@ const resolvers = {
   Mutation: {
     addProfile: async (_parent: any, { input }: AddUserArgs): Promise<{ token: string; user: User }> => {
       const user = await User.create({ ...input });
-      const token = signToken(user.username, user.email, user._id, );
+      const token = signToken(user.username, user.email, user._id, user.wife);
       return { token, user };
     },
     login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; user: User }> => {
       const user = await User.findOne({ email });
       if (!user) {
-        throw AuthenticationError;
+        throw new AuthenticationError('User not found');
       }
 
-      const isPasswordHusband = await user.isPasswordHusband(password);
-      const isPasswordWife = await user.isPasswordWife(password);
-
-      if (!isPasswordHusband && !isPasswordWife) {
-        throw AuthenticationError;
+      const isPasswordValid = await user.Password(password);
+      if (!isPasswordValid) {
+        throw new AuthenticationError('Invalid password');
       }
 
-      const token = signToken(profile.name, profile.email, profile._id, isPasswordWife);
-      return { token, profile };
+      const token = signToken(user.name, user.email, user._id, user.password);
+      return { token, user };
     },
-    addTask: async (_parent: any, { profileId, skill }: AddSkillArgs, context: Context): Promise<Profile | null> => {
+    addTask: async (_parent: any, { userId, task }: AddTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
-
         if(context.user.wife) {
-          return await Profile.findOneAndUpdate(
-            { _id: profileId },
+          return await User.findOneAndCreate(
+            { _id: userId },
             {
-              $addToSet: { skills: skill },
+              $addToSet: { tasks: task },
             },
             {
               new: true,
@@ -107,25 +102,49 @@ const resolvers = {
             }
           );
         } else {
-
+          throw new AuthenticationError('Only the wife can create task');
         }
         
       }
       throw AuthenticationError;
     },
-    removeProfile: async (_parent: any, _args: any, context: Context): Promise<Profile | null> => {
+    updateTask: async (_parent: any, { task }: UpdateTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
-        return await Profile.findOneAndDelete({ _id: context.user._id });
+        if(context.user.wife) {
+          return await User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $pull: { tasks: task } },
+            { new: true }
+          );
+        }
+        else {
+          return await User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $set: { 'tasks.$[elem].status': task.status } }, // Assuming task has a status field
+            {
+              new: true,
+              arrayFilters: [{ 'elem._id': task._id }],
+            }
+          );
+        }
       }
       throw AuthenticationError;
     },
-    removeSkill: async (_parent: any, { skill }: RemoveSkillArgs, context: Context): Promise<Profile | null> => {
+    deleteTask: async (_parent: any, { task }: RemoveTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
-        return await Profile.findOneAndUpdate(
-          { _id: context.user._id },
-          { $pull: { skills: skill } },
-          { new: true }
-        );
+        if(context.user.wife) {
+          return await User.findOneAndDelete({ _id: task._id });
+        } else {
+          throw new AuthenticationError('Only the wife can delete task');
+        }
+      }
+      throw AuthenticationError;
+    },
+    // Maybe not needed - Keeping just in case.
+    // At this time, we do not have a remove profile functionality.
+    removeProfile: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
+      if (context.user) {
+        return await User.findOneAndDelete({ _id: context.user._id });
       }
       throw AuthenticationError;
     },
