@@ -9,7 +9,7 @@ import type { User } from '../models/User';
 
 // biome-ignore lint/correctness/noEmptyPattern: <explanation>
 const LoginForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedTasks: [] });
+  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', wife: true, savedTasks: [] });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -46,6 +46,7 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
       username: '',
       email: '',
       password: '',
+      wife: '',
       savedTasks: [],
     });
   };
