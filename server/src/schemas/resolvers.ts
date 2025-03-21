@@ -1,5 +1,5 @@
 import User, { UserDocument } from '../models/User';
-import Tasks, {TaskDocument} from '../models/Task'
+import Task, {TaskDocument} from '../models/Task'
 import { signToken } from '../services/auth';
 
 interface User{
@@ -90,7 +90,6 @@ const resolvers = {
     },
     addTask: async (_parent: any, { userId, task }: AddTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
-
         if(context.user.wife) {
           return await User.findOneAndCreate(
             { _id: userId },
@@ -131,11 +130,10 @@ const resolvers = {
       }
       throw AuthenticationError;
     },
-    deleteTask: async (_parent: any, _args: any, context: Context): Promise<TaskDocument | null> => {
+    deleteTask: async (_parent: any, { task }: RemoveTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
         if(context.user.wife) {
-          // TODO: Implement the logic to delete a task
-          return await User.findOneAndDelete({ _id: taskId });
+          return await User.findOneAndDelete({ _id: task._id });
         } else {
           throw new AuthenticationError('Only the wife can delete task');
         }
