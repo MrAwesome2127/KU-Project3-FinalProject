@@ -10,12 +10,6 @@ import { signToken } from '../services/auth';
 //   skills: string[];
 // }
 
-// interface ProfileArgs {
-//   profileId: string;
-// }
-
-
-
 // interface AddSkillArgs {
 //   profileId: string;
 //   skill: string;
@@ -26,14 +20,13 @@ import { signToken } from '../services/auth';
 //   skill: string;
 // }
 
-// interface Context {
-//   user?: Profile;
-// }
-
 interface User{
   username: string;
   email: string;
   password: string;
+  // passwordWife: string;
+  // passwordHusband: string;
+  wife: boolean;
   savedTasks: Task[];
 }
 
@@ -53,6 +46,13 @@ interface Task {
   taskId: string;
 }
 
+interface UserArgs {
+  userId: string;
+}
+
+interface Context {
+  user?: User;
+}
 
 
 const resolvers = {
@@ -60,8 +60,8 @@ const resolvers = {
     profiles: async (): Promise<User[]> => {
       return await User.find();
     },
-    profile: async (_parent: any, { profileId }: ProfileArgs): Promise<User | null> => {
-      return await User.findOne({ _id: profileId });
+    profile: async (_parent: any, { userId }: UserArgs): Promise<User | null> => {
+      return await User.findOne({ _id: userId });
     },
     me: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
@@ -73,10 +73,10 @@ const resolvers = {
   Mutation: {
     addProfile: async (_parent: any, { input }: AddUserArgs): Promise<{ token: string; user: User }> => {
       const user = await User.create({ ...input });
-      const token = signToken(user.username, user.email, user._id);
+      const token = signToken(user.username, user.email, user._id, );
       return { token, user };
     },
-    login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; profile: Profile }> => {
+    login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; user: User }> => {
       const user = await User.findOne({ email });
       if (!user) {
         throw AuthenticationError;
