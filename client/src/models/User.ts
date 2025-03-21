@@ -1,4 +1,5 @@
-import type { Task } from './Task';
+import { TaskDocument } from "../models/TaskDocument";
+
 
 export interface User {
   username: string | null;
@@ -7,5 +8,5 @@ export interface User {
   // passwordWife: string | null;
   // passwordHusband: string | null;
   wife: boolean;
-  savedTasks: Task[];
+  savedTasks: TaskDocument[];
 }

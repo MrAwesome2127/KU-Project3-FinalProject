@@ -1,4 +1,4 @@
-export interface Task {
+export interface TaskDocument {
   title: string;
   description: string;
   stressLevel: string,
