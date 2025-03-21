@@ -34,7 +34,8 @@ export const autheticateToken = (req: Request, res: Response, next: NextFunction
 };
 
 export const signToken = (username: string, email: string, _id:unknown, wife: boolean) => {
-  const payload = { username, email, _id, wife };
+  const id = (_id as string).toString();
+  const payload = { username, email, id, wife };
   const secretKey = process.env.JWT_SECRET_KEY || '';
 
   return jwt.sign(payload, secretKey, { expiresIn: '365d' }); //365 day expiration

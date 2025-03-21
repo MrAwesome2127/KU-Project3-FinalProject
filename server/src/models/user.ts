@@ -30,20 +30,20 @@ const userSchema = new Schema<UserDocument>(
       unique: true,
       match: [/.+@.+\..+/, 'Must use a valid email address'],
     },
-    // password: {
+    password: {
+      type: String,
+      required: true,
+    },
+    // passwordWife: {
     //   type: String,
     //   required: true,
+    //   minlength: 8,
     // },
-    passwordWife: {
-      type: String,
-      required: true,
-      minlength: 8,
-    },
-    passwordHusband: {
-      type: String,
-      required: true,
-      minlength: 8,
-    },
+    // passwordHusband: {
+    //   type: String,
+    //   required: true,
+    //   minlength: 8,
+    // },
 
     savedTasks:  [{
       type: Schema.Types.ObjectId,
@@ -68,17 +68,17 @@ userSchema.pre('save', async function  (next) {
   next();
 })
 
-// userSchema.methods.isCorrectPassword = async function (password: string) {
-//   return await bcrypt.compare(password, this.password);
+userSchema.methods.isCorrectPassword = async function (password: string) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// userSchema.methods.isPasswordHusband = async function (password: string) {
+//   return await bcrypt.compare(password, this.passwordHusband);
 // };
 
-userSchema.methods.isPasswordHusband = async function (password: string) {
-  return await bcrypt.compare(password, this.passwordHusband);
-};
-
-userSchema.methods.isPasswordWife = async function (password: string) {
-  return await bcrypt.compare(password, this.passwordWife);
-};
+// userSchema.methods.isPasswordWife = async function (password: string) {
+//   return await bcrypt.compare(password, this.passwordWife);
+// };
 
 userSchema.virtual('taskCount').get(function() {
   return this.savedTasks.length;
