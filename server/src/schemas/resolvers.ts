@@ -23,6 +23,7 @@ interface AddUserArgs {
 }
 
 interface Task {
+  _id: string;
   title: string;
   description: string;
   stressLevel: string,
@@ -37,14 +38,19 @@ interface Context {
   user?: User;
 }
 
-interface AddSkillArgs {
+interface AddTaskArgs {
   userId: string;
-  skill: string;
+  task: string;
 }
 
-interface RemoveSkillArgs {
+interface UpdateTaskArgs {
   userId: string;
-  skill: string;
+  task: string;
+}
+
+interface RemoveTaskArgs {
+  userId: string;
+  task: string;
 }
 
 const resolvers = {
@@ -82,14 +88,14 @@ const resolvers = {
       const token = signToken(user.name, user.email, user._id, user.password);
       return { token, user };
     },
-    addTask: async (_parent: any, { userId, skill }: AddSkillArgs, context: Context): Promise<User | null> => {
+    addTask: async (_parent: any, { userId, task }: AddTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
 
         if(context.user.wife) {
-          return await User.findOneAndUpdate(
+          return await User.findOneAndCreate(
             { _id: userId },
             {
-              $addToSet: { skills: skill },
+              $addToSet: { tasks: task },
             },
             {
               new: true,
@@ -97,9 +103,42 @@ const resolvers = {
             }
           );
         } else {
-          throw new AuthenticationError('Only the wife can create, modify, or delete tasks');
+          throw new AuthenticationError('Only the wife can create task');
         }
         
+      }
+      throw AuthenticationError;
+    },
+    updateTask: async (_parent: any, { task }: UpdateTaskArgs, context: Context): Promise<User | null> => {
+      if (context.user) {
+        if(context.user.wife) {
+          return await User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $pull: { tasks: task } },
+            { new: true }
+          );
+        }
+        else {
+          return await User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $set: { 'tasks.$[elem].status': task.status } }, // Assuming task has a status field
+            {
+              new: true,
+              arrayFilters: [{ 'elem._id': task._id }],
+            }
+          );
+        }
+      }
+      throw AuthenticationError;
+    },
+    deleteTask: async (_parent: any, _args: any, context: Context): Promise<TaskDocument | null> => {
+      if (context.user) {
+        if(context.user.wife) {
+          // TODO: Implement the logic to delete a task
+          return await User.findOneAndDelete({ _id: taskId });
+        } else {
+          throw new AuthenticationError('Only the wife can delete task');
+        }
       }
       throw AuthenticationError;
     },
@@ -108,16 +147,6 @@ const resolvers = {
     removeProfile: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
         return await User.findOneAndDelete({ _id: context.user._id });
-      }
-      throw AuthenticationError;
-    },
-    removeSkill: async (_parent: any, { skill }: RemoveSkillArgs, context: Context): Promise<User | null> => {
-      if (context.user) {
-        return await User.findOneAndUpdate(
-          { _id: context.user._id },
-          { $pull: { skills: skill } },
-          { new: true }
-        );
       }
       throw AuthenticationError;
     },
