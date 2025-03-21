@@ -1,7 +1,7 @@
 import { Schema, model, type Document} from 'mongoose';
 import bcrypt from 'bcrypt';
 
-import taskSchema, { type TaskDocument } from './task.ts';
+import taskSchema, { type TaskDocument } from './Task.js';
 
 export interface UserDocument extends Document {
   id: string;
@@ -45,11 +45,7 @@ const userSchema = new Schema<UserDocument>(
     //   minlength: 8,
     // },
 
-    savedTasks:  [{
-      type: Schema.Types.ObjectId,
-      ref: 'Task',
-      },
-    ],
+    savedTasks: [taskSchema],
   },
   {
     toJSON: {
@@ -58,15 +54,15 @@ const userSchema = new Schema<UserDocument>(
   }
 );
 
-userSchema.pre('save', async function  (next) {
-  if (this.isNew || this.isModified('password')){
-    const saltRounds = 10;
-    this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
-    this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
-  }
+// userSchema.pre('save', async function  (next) {
+//   if (this.isNew || this.isModified('password')){
+//     const saltRounds = 10;
+//     this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
+//     this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
+//   }
 
-  next();
-})
+//   next();
+// })
 
 userSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password);
