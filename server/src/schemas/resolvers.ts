@@ -30,6 +30,9 @@ interface Task {
   taskId: string;
 }
 
+// Is userId the correct call here? I see _id, and also just id in models/User.ts
+// - Ryan
+
 interface UserArgs {
   userId: string;
 }
@@ -37,6 +40,14 @@ interface UserArgs {
 interface Context {
   user?: User;
 }
+
+// Some of these args are very similar, or the same.
+// Can this be refactored to just TaskArgs:
+// interface TaskArgs {
+//   userId: string;
+//   task: string;
+// }
+// - Ryan
 
 interface AddTaskArgs {
   userId: string;
@@ -54,6 +65,8 @@ interface RemoveTaskArgs {
 }
 
 const resolvers = {
+  // Ask Joem which queries he believes would be necessary
+  // - Ryan
   Query: {
     profiles: async (): Promise<User[]> => {
       return await User.find();
@@ -67,6 +80,14 @@ const resolvers = {
       }
       throw AuthenticationError;
     },
+    // Add Query for all task related to a user.
+    // I believe this would look similar to the commented out code snippet below.
+    // - Ryan
+
+    // tasks: async (_parent: any, { userId }: { userId: string }): Promise<TaskDocument[] | null> => {
+    //   const params = userId ? { userId } : {};
+    //   return Task.find(params);
+    // },
   },
   Mutation: {
     addProfile: async (_parent: any, { input }: AddUserArgs): Promise<{ token: string; user: User }> => {
@@ -74,6 +95,14 @@ const resolvers = {
       const token = signToken(user.username, user.email, user._id, user.wife);
       return { token, user };
     },
+
+    // Everything on the mutations look good to me, but we will need to test all of them to troubleshoot
+    // any possible issues.
+    
+    // Definitely go over log in, I am pretty sure I set everything up correctly in services/auth.ts,
+    // but I am not entirely sure on the integration.
+    // - Ryan
+
     login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; user: User }> => {
       const user = await User.findOne({ email });
       if (!user) {
