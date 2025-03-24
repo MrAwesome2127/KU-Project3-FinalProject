@@ -1,6 +1,6 @@
-import User, { UserDocument } from '../models/user';
-import Task, {TaskDocument} from '../models/Task'
-import { signToken } from '../services/auth';
+import User, { UserDocument } from '../models/user.js';
+import {TaskDocument} from '../models/Task.js'
+import { signToken } from '../services/auth.js';
 
 import { GraphQLError } from 'graphql';
 
@@ -27,14 +27,14 @@ interface AddUserArgs {
   }
 }
 
-interface Task {
-  _id: string;
-  title: string;
-  description: string;
-  stressLevel: string,
-  taskId: string;
-  status: string;
-}
+// interface Task {
+//   _id: string;
+//   title: string;
+//   description: string;
+//   stressLevel: string,
+//   taskId: string;
+//   status: string;
+// }
 
 // interface UserArgs {
 //   userId: string;
@@ -50,7 +50,7 @@ interface Context {
 }
 
 interface AddTaskArgs {
-  task: string;
+  task: TaskDocument;
 }
 
 interface UpdateTaskArgs {
@@ -98,6 +98,10 @@ const resolvers = {
 
       const isWife = await user.isPasswordWife(password);
       const isHusband = await user.isPasswordHusband(password);
+
+      console.log(isWife)
+
+      console.log(isHusband)
 
       if(!isWife && !isHusband) {
         throw new GraphQLError('Invalid password');

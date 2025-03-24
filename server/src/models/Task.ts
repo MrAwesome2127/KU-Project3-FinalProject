@@ -26,7 +26,7 @@ const taskSchema = new Schema<TaskDocument>({
   }
 });
 
-const Task = model<TaskDocument>('Thought', taskSchema);
+// const Task = model<TaskDocument>('Thought', taskSchema);
 
 
-export default Task;
+export default taskSchema;

@@ -3,7 +3,7 @@ import process from 'process';
 
 const cleanDB = async (): Promise<void> => {
   try {
-    await Task.deleteMany({});
+    // await Task.deleteMany({});
     await User.deleteMany({});
     console.log('Database cleaned successfully');
   } catch (error) {

@@ -11,26 +11,43 @@ const typeDefs = `
         email: String
         savedTasks: [Task]
     }
-    
+
+    type Task {
+        title: String
+        description: String
+        stressLevel: String
+        taskId: String
+    }
+
     type Auth {
-        token: String
+        token: ID!
         user: User
     }
-    
+
+
+    input AddUserArgs {
+        username: String!
+        email: String!
+        passwordWife: String!
+        passwordHusband: String!
+    }
+
+    input AddTaskArgs {
+        taskId: String
+        title: String
+        description: String
+        stressLevel: String
+    }
+
+
     type Query {
         me: User
     }
-    
+
     type Mutation {
+        addProfile(input: AddUserArgs): Auth
         login(email: String!, password: String!): Auth
-        addUser(username: String!, email: String!, passwordWife: String!, passwordHusband: String!): Auth
-        saveTask(task: TaskInput!): User
-    }
-    
-    input TaskInput {
-        title: String
-        description: String
-        status: String
+        addTask(task: AddTaskArgs): User
     }
 `
 

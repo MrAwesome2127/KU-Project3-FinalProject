@@ -56,15 +56,15 @@ const userSchema = new Schema<UserDocument>(
   }
 );
 
-// userSchema.pre('save', async function  (next) {
-//   if (this.isNew || this.isModified('password')){
-//     const saltRounds = 10;
-//     this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
-//     this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
-//   }
+userSchema.pre('save', async function  (next) {
+  if (this.isNew || this.isModified('password')){
+    const saltRounds = 10;
+    this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
+    this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
+  }
 
-//   next();
-// })
+  next();
+})
 
 // userSchema.methods.isCorrectPassword = async function (password: string) {
 //   return await bcrypt.compare(password, this.password);
