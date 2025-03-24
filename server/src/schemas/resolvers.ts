@@ -49,6 +49,14 @@ interface Context {
   };
 }
 
+// Some of these args are very similar, or the same.
+// Can this be refactored to just TaskArgs:
+// interface TaskArgs {
+//   userId: string;
+//   task: string;
+// }
+// - Ryan
+
 interface AddTaskArgs {
   task: TaskDocument;
 }
@@ -77,7 +85,6 @@ const resolvers = {
       }
       throw AuthenticationError;
     },
-    //No need to query "tasks", they are already in the 'me' query
   },
   Mutation: {
     addProfile: async (_parent: any, { input }: AddUserArgs): Promise<{ token: string; user: User }> => {
@@ -85,6 +92,14 @@ const resolvers = {
       const token = signToken(user.username, user.email, user._id, true);
       return { token, user };
     },
+
+    // Everything on the mutations look good to me, but we will need to test all of them to troubleshoot
+    // any possible issues.
+    
+    // Definitely go over log in, I am pretty sure I set everything up correctly in services/auth.ts,
+    // but I am not entirely sure on the integration.
+    // - Ryan
+
     login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; user: User }> => {
       const user = await User.findOne({ email });
       if (!user) {
