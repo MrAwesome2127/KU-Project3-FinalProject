@@ -7,8 +7,10 @@ export interface UserDocument extends Document {
   id: string;
   username: string;
   email: string;
-  password: string;
+  // password: string;
   savedTasks: TaskDocument[];
+  passwordWife: string;
+  passwordHusband: string;
   // isCorrectPassword(password: string): Promise<boolean>;
   isPasswordHusband(password: string): Promise<boolean>;
   isPasswordWife(password: string): Promise<boolean>;
@@ -30,20 +32,20 @@ const userSchema = new Schema<UserDocument>(
       unique: true,
       match: [/.+@.+\..+/, 'Must use a valid email address'],
     },
-    password: {
+    // password: {
+    //   type: String,
+    //   required: true,
+    // },
+    passwordWife: {
       type: String,
       required: true,
+      minlength: 8,
     },
-    // passwordWife: {
-    //   type: String,
-    //   required: true,
-    //   minlength: 8,
-    // },
-    // passwordHusband: {
-    //   type: String,
-    //   required: true,
-    //   minlength: 8,
-    // },
+    passwordHusband: {
+      type: String,
+      required: true,
+      minlength: 8,
+    },
 
     savedTasks: [taskSchema],
   },
@@ -54,27 +56,27 @@ const userSchema = new Schema<UserDocument>(
   }
 );
 
-// userSchema.pre('save', async function  (next) {
-//   if (this.isNew || this.isModified('password')){
-//     const saltRounds = 10;
-//     this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
-//     this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
-//   }
+userSchema.pre('save', async function  (next) {
+  if (this.isNew || this.isModified('password')){
+    const saltRounds = 10;
+    this.passwordWife = await bcrypt.hash(this.passwordWife, saltRounds)
+    this.passwordHusband = await bcrypt.hash(this.passwordHusband, saltRounds)
+  }
 
-//   next();
-// })
+  next();
+})
 
-userSchema.methods.isCorrectPassword = async function (password: string) {
-  return await bcrypt.compare(password, this.password);
+// userSchema.methods.isCorrectPassword = async function (password: string) {
+//   return await bcrypt.compare(password, this.password);
+// };
+
+userSchema.methods.isPasswordHusband = async function (password: string) {
+  return await bcrypt.compare(password, this.passwordHusband);
 };
 
-// userSchema.methods.isPasswordHusband = async function (password: string) {
-//   return await bcrypt.compare(password, this.passwordHusband);
-// };
-
-// userSchema.methods.isPasswordWife = async function (password: string) {
-//   return await bcrypt.compare(password, this.passwordWife);
-// };
+userSchema.methods.isPasswordWife = async function (password: string) {
+  return await bcrypt.compare(password, this.passwordWife);
+};
 
 userSchema.virtual('taskCount').get(function() {
   return this.savedTasks.length;

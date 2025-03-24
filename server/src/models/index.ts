@@ -1,4 +1,4 @@
-import Task from './tasks.ts';
-import User from './User.js';
+import Task from './Task.js';
+import User from './user.js';
 
 export { Task, User };

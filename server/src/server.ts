@@ -3,13 +3,18 @@ import path from "node:path";
 import type { Request, Response } from "express";
 import db from "./config/connection.js";
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from "@apollo/server/express4";
+import { expressMiddleware } from '@apollo/server/express4';
 import { authenticateToken } from './services/auth.js';
 import { typeDefs, resolvers } from './schemas/index.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
 });
 
 const startApolloServer = async() => {
@@ -22,17 +27,19 @@ const startApolloServer = async() => {
   app.use(express.urlencoded({ extended: false}));
   app.use(express.json());
 
+
   app.use('/graphql', expressMiddleware(server as any,
     {
       context: authenticateToken as any
     }
   ));
 
-  app.use(express.static(path.join(__dirname, '../../client/dist')))
 
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
-  });
+  // app.use(express.static(path.join(__dirname, '../../client/dist')))
+
+  // app.get('*', (_req: Request, res: Response) => {
+  //   res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+  // });
 
   app.listen(PORT, () => {
     console.log(`API server running on port ${PORT}!`);

@@ -12,25 +12,46 @@ interface JwtPayload {
   wife: boolean;
 }
 
-export const autheticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+// export const authenticateToken = (req: any, res: Response, next: NextFunction) => {
+//   const authHeader = req.headers.authorization;
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
+//   if (authHeader) {
+//     const token = authHeader.split(' ')[1];
 
-    const secretKey = process.env.JWT_SECRET_KEY || '';
+//     const secretKey = process.env.JWT_SECRET_KEY || '';
 
-    jwt.verify(token, secretKey, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
+//     jwt.verify(token, secretKey, (err:any, user:any) => {
+//       if (err) {
+//         return res.sendStatus(403);
+//       }
 
-      req.user = user as JwtPayload;
-      return next();
-    });
-  } else {
-    res.sendStatus(401);
+//       req.user = user as JwtPayload;
+//       return next();
+//     });
+//   } else {
+//     res.sendStatus(401);
+//   }
+// };
+
+export const authenticateToken = ({ req }: any) => {
+  let token = req.body.token || req.query.token || req.headers.authorization;
+
+  if (req.headers.authorization) {
+    token = token.split(' ').pop().trim();
   }
+
+  if (!token) {
+    return req;
+  }
+
+  try {
+    const { data }: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '', { maxAge: '2hr' });
+    req.user = data;
+  } catch (err) {
+    console.log('Invalid token');
+  }
+
+  return req;
 };
 
 export const signToken = (username: string, email: string, _id:unknown, wife: boolean) => {
