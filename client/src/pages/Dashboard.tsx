@@ -1,54 +1,112 @@
-import TaskList from "../components/TaskList";
-import auth from "../utils/auth";
+// Dashboard.tsx
+import React, { useState } from'react';
+import { DragDropContext } from'react-beautiful-dnd';
+import TaskList from '../components/TaskList';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// import { useQuery } from "@apollo/client";
-// import { GET_ALL_TASKS } from "../utils/queries";
+interface TaskDocument {
+  id: string;
+  taskId: string;
+  title: string;
+  description: string;
+  stressLevel: string;
+  dueDate: Date;
+  column: string;
+}
 
 function Dashboard() {
-//   const { loading, data } = useQuery(GET_ALL_TASKS);
+  const [tasks, setTasks] = useState<TaskDocument[]>([
+    { id: '1', taskId: '1', title: 'Task 1', description: 'This is task 1', stressLevel: 'Low', dueDate: new Date('2024-01-01'), column: 'new' },
+    { id: '2', taskId: '2', title: 'Task 2', description: 'This is task 2', stressLevel: 'Medium', dueDate: new Date('2024-01-15'), column: 'inProgress' },
+    { id: '3', taskId: '3', title: 'Task 3', description: 'This is task 3', stressLevel: 'High', dueDate: new Date('2024-02-01'), column: 'completed' },
+  ]);
 
-//   const tasks = data.getAllTasks;
+  const [userId, setUserId] = useState('wife');
 
-  //   if (!auth.loggedIn()) {
-  //     return (
-  //       <>
-  //         <h1>You must be logged in first!</h1>
-  //       </>
-  //     );
-  //   }
+  const handleMoveTask = (task: TaskDocument, toColumn: 'new' | 'inProgress' | 'completed') => {
+    setTasks((prevTasks) => {
+      const newTasks = [...prevTasks];
+      const taskIndex = newTasks.findIndex((t) => t.id === task.id);
+      if (taskIndex!== -1) {
+        newTasks[taskIndex].column = toColumn;
+      }
+      return newTasks;
+    });
+  };
 
-//   if (loading) {
-//     return <h2>Data is still loading, please wait!</h2>;
-//   }
+  const handleEditTask = (task: TaskDocument) => {
+    // This function is handled in TaskList.tsx
+  };
+
+  const handleDeleteTask = (task: TaskDocument) => {
+    // This function is handled in TaskList.tsx
+  };
+
+  const handleAddTask = (newTask: TaskDocument) => {
+    setTasks((prevTasks) => {
+      const newTasks = [...prevTasks];
+      newTasks.push(newTask);
+      return newTasks;
+    });
+  };
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+    if (source.droppableId!== destination.droppableId) {
+      const sourceColumn = tasks.filter((task) => task.column === source.droppableId);
+      const destColumn = tasks.filter((task) => task.column === destination.droppableId);
+      const sourceItems = sourceColumn;
+      const destItems = destColumn;
+
+      const [removed] = sourceItems.splice(source.index, 1);
+
+      destItems.splice(destination.index, 0, removed);
+
+      setTasks((prevTasks) => {
+        const newTasks = [...prevTasks];
+        const sourceIndex = newTasks.findIndex((t) => t.column === source.droppableId);
+        const destIndex = newTasks.findIndex((t) => t.column === destination.droppableId);
+        if (sourceIndex!== -1) {
+          newTasks[sourceIndex].column = source.droppableId;
+        }
+        if (destIndex!== -1) {
+          newTasks[destIndex].column = destination.droppableId;
+        }
+        return newTasks;
+      });
+    } else {
+      const column = tasks.filter((task) => task.column === source.droppableId);
+      const copiedItems = [...column];
+
+      const [removed] = copiedItems.splice(source.index, 1);
+
+      copiedItems.splice(destination.index, 0, removed);
+
+      setTasks((prevTasks) => {
+        const newTasks = [...prevTasks];
+        const index = newTasks.findIndex((t) => t.column === source.droppableId);
+        if (index!== -1) {
+          newTasks[index].column = source.droppableId;
+        }
+        return newTasks;
+      });
+    }
+  };
 
   return (
-    <>
-      <h1>This is the dashboard page</h1>
-
+    <DragDropContext onDragEnd={onDragEnd}>
       <TaskList
-        // tasks={tasks}
-        tasks={[
-          {
-            taskId: "assigned",
-            title: "test 1",
-            description: "this is a test",
-            stressLevel: "high",
-          },
-          {
-            taskId: "completed",
-            title: "test 2",
-            description: "this is a test 2",
-            stressLevel: "medium",
-          },
-          {
-            taskId: "inProgress",
-            title: "test 3",
-            description: "this is a test",
-            stressLevel: "high",
-          },
-        ]}
+        tasks={tasks}
+        userId={userId}
+        userRole="admin"
+        handleMoveTask={handleMoveTask}
+        handleEditTask={handleEditTask}
+        handleDeleteTask={handleDeleteTask}
+        handleAddTask={handleAddTask}
       />
-    </>
+    </DragDropContext>
   );
 }
 
