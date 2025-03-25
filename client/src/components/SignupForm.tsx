@@ -2,11 +2,18 @@ import { useState } from'react';
 import type { ChangeEvent, FormEvent } from'react';
 import { Form, Button, Alert } from'react-bootstrap';
 
-import { createUser } from '../utils/API';
+// import { createUser } from '../utils/API';
+import { useMutation } from '@apollo/client';
+import { ADD_PROFILE } from '../utils/mutations';
+
 import Auth from '../utils/auth';
 import type { User } from '../models/User';
 
 const SignupForm = ({}: { handleModalClose: () => void }) => {
+
+  const [createUser] = useMutation(ADD_PROFILE)
+
+
   const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', passwordWife: '', passwordHusband: '', savedTasks: [] });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -26,13 +33,28 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
     }
 
     try {
-      const response = await createUser(userFormData);
+      // const response = await createUser(userFormData);
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+      // if (!response.ok) {
+      //   throw new Error('something went wrong!');
+      // }
 
-      const { token } = await response.json();
+      // const { token } = await response.json();
+
+      const response = await createUser({
+        variables: {
+          "input": {
+            "username": userFormData.username,
+            "passwordWife": userFormData.passwordWife,
+            "passwordHusband": userFormData.passwordHusband,
+            "email": userFormData.email
+          }
+        }
+      })
+
+
+      const token = response.data.addProfile.token
+
       Auth.login(token);
     } catch (err) {
       console.error(err);
@@ -86,7 +108,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
           <Form.Control
             type='password'
             placeholder='Your password'
-            name='password'
+            name='passwordWife'
             onChange={handleInputChange}
             value={userFormData.passwordWife || ''}
             required
@@ -98,7 +120,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
           <Form.Control
             type='password'
             placeholder='Your password'
-            name='password'
+            name='passwordHusband'
             onChange={handleInputChange}
             value={userFormData.passwordHusband || ''}
             required
