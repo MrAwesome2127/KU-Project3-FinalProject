@@ -3,4 +3,5 @@ export interface TaskDocument {
   description: string;
   stressLevel: string,
   taskId: string;
+  dueDate: Date;
 }
