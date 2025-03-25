@@ -7,7 +7,7 @@ import Auth from '../utils/auth';
 import type { User } from '../models/User';
 
 const SignupForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedTasks: [] });
+  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', passwordWife: '', passwordHusband: '', savedTasks: [] });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -42,7 +42,8 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
     setUserFormData({
       username: '',
       email: '',
-      password: '',
+      passwordWife: '', 
+      passwordHusband: '',
       savedTasks: [],
     });
   };
@@ -81,19 +82,31 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
         </Form.Group>
 
         <Form.Group className='mb-3'>
-          <Form.Label htmlFor='password'>Password</Form.Label>
+          <Form.Label htmlFor='password'>Password Wife</Form.Label>
           <Form.Control
             type='password'
             placeholder='Your password'
             name='password'
             onChange={handleInputChange}
-            value={userFormData.password || ''}
+            value={userFormData.passwordWife || ''}
+            required
+          />
+          <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
+        </Form.Group>
+        <Form.Group className='mb-3'>
+          <Form.Label htmlFor='password'>Password Husband</Form.Label>
+          <Form.Control
+            type='password'
+            placeholder='Your password'
+            name='password'
+            onChange={handleInputChange}
+            value={userFormData.passwordHusband || ''}
             required
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group> 
         <Button
-          disabled={!(userFormData.username && userFormData.email && userFormData.password)}
+          disabled={!(userFormData.username && userFormData.email && userFormData.passwordWife && userFormData.passwordHusband)}
           type='submit'
           variant='success'>
           Submit
