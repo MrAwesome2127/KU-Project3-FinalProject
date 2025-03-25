@@ -13,17 +13,16 @@ const typeDefs = `
     }
 
     type Task {
+        _id: String
         title: String
         description: String
         stressLevel: String
-        taskId: String
     }
 
     type Auth {
         token: ID!
         user: User
     }
-
 
     input AddUserArgs {
         username: String!
@@ -33,12 +32,11 @@ const typeDefs = `
     }
 
     input AddTaskArgs {
-        taskId: String
         title: String
         description: String
         stressLevel: String
+        dueDate: String
     }
-
 
     type Query {
         me: User

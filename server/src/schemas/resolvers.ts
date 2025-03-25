@@ -1,5 +1,5 @@
 import User, { UserDocument } from '../models/user.js';
-import {TaskDocument} from '../models/Task.js'
+import { TaskDocument} from '../models/Task.js'
 import { signToken } from '../services/auth.js';
 
 import { GraphQLError } from 'graphql';
@@ -65,12 +65,6 @@ interface RemoveTaskArgs {
 
 const resolvers = {
   Query: {
-    // profiles: async (): Promise<User[]> => {
-    //   return await User.find();
-    // },
-    // profile: async (_parent: any, { userId }: UserArgs): Promise<User | null> => {
-    //   return await User.findOne({ _id: userId });
-    // },
     me: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
         return await User.findOne({ _id: context.user._id });
@@ -90,11 +84,6 @@ const resolvers = {
       if (!user) {
         throw new GraphQLError('User not found');
       }
-
-      // const isPasswordValid = await user.Password(password);
-      // if (!isPasswordValid) {
-      //   throw new GraphQLError('Invalid password');
-      // }
 
       const isWife = await user.isPasswordWife(password);
       const isHusband = await user.isPasswordHusband(password);
@@ -118,8 +107,15 @@ const resolvers = {
       return { token, user };
     },
     addTask: async (_parent: any, { task }: AddTaskArgs, context: Context): Promise<User | null> => {
+      console.log("Add Task start point " + context.user);
+      
       if (context.user) {
+        console.log("Signed in?");
+        
         if(context.user.wife) {
+          console.log("Signed in as wife");
+          // const newTask = new Task(task);
+          // await newTask.save();
           return await User.findOneAndUpdate(
             { _id: context.user._id },
             {
@@ -133,9 +129,8 @@ const resolvers = {
         } else {
           throw new GraphQLError('Only the wife can create task');
         }
-  
       }
-      throw AuthenticationError;
+      throw new GraphQLError('You need to be logged in!');
     },
     // updateTask: async (_parent: any, { task }: UpdateTaskArgs, context: Context): Promise<User | null> => {
     //   if (context.user) {
