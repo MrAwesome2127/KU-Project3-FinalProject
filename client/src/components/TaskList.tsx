@@ -1,36 +1,70 @@
-// TaskList.tsx
-import React from'react';
-import { Draggable, Droppable } from'react-beautiful-dnd';
+import React, { useState } from 'react';
+import { Droppable, Draggable } from 'react-beautiful-dnd';
 import Task from './Task';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-interface TaskDocument {
-  id: string;
-  taskId: string;
-  title: string;
-  description: string;
-  stressLevel: string;
-  dueDate: Date;
-  column: string;
-}
+import { TaskDocument } from '../models/TaskDocument';
 
 interface TaskListProps {
   tasks: TaskDocument[];
-  userId: string;
-  userRole: string;
-  handleMoveTask: (task: TaskDocument, toColumn: 'new' | 'inProgress' | 'completed') => void;
-  handleEditTask: (task: TaskDocument) => void;
-  handleDeleteTask: (task: TaskDocument) => void;
   handleAddTask: (newTask: TaskDocument) => void;
+  handleDeleteTask: (task: TaskDocument) => void;
+  handleEditTask: (editedTask: TaskDocument) => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMoveTask, handleEditTask, handleDeleteTask }) => {
-  const newTasks = tasks.filter((task) => task.column === 'new');
-  const inProgressTasks = tasks.filter((task) => task.column === 'inProgress');
-  const completedTasks = tasks.filter((task) => task.column === 'completed');
+const TaskList: React.FC<TaskListProps> = ({
+  tasks,
+  handleAddTask,
+  handleDeleteTask,
+  handleEditTask,
+}) => {
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    stressLevel: 'Low',
+    dueDate: '',
+  });
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+    setNewTask((prevTask) => ({ ...prevTask, [name]: value }));
+  };
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setNewTask((prevTask) => ({ ...prevTask, [name]: value }));
+  };
+
+  const handleAddTaskClick = () => {
+    if (newTask.title && newTask.description && newTask.dueDate) {
+      const task: TaskDocument = {
+        title: newTask.title,
+        description: newTask.description,
+        stressLevel: newTask.stressLevel,
+        _id: Math.random().toString(36).substr(2, 9),
+        dueDate: new Date(newTask.dueDate),
+        status: 'new', // Set default status to 'new'
+      };
+      handleAddTask(task);
+      setNewTask({
+        title: '',
+        description: '',
+        stressLevel: 'Low',
+        dueDate: '',
+      });
+    }
+  };
+
+  const newTasks = tasks.filter((task) => task.status === 'new');
+  const inProgressTasks = tasks.filter((task) => task.status === 'inProgress');
+  const completedTasks = tasks.filter((task) => task.status === 'completed');
 
   return (
-    <div className="container mt-5">
+    <div>
+      <div className="text-center mb-5">
+        <button className="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
+          Add Task
+        </button>
+      </div>
       <div className="row">
         <div className="col-4">
           <h2 className="text-center">New</h2>
@@ -40,20 +74,14 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="list-group">
                     {newTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                      <Draggable key={task._id} draggableId={task._id} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            <Task
-                              task={task}
-                              handleMoveTask={handleMoveTask}
-                              handleEditTask={handleEditTask}
-                              handleDeleteTask={handleDeleteTask}
-                              userId={userId}
-                            />
+                            <Task task={task} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} userId="wife" />
                           </div>
                         )}
                       </Draggable>
@@ -73,20 +101,14 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="list-group">
                     {inProgressTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                      <Draggable key={task._id} draggableId={task._id} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            <Task
-                              task={task}
-                              handleMoveTask={handleMoveTask}
-                              handleEditTask={handleEditTask}
-                              handleDeleteTask={handleDeleteTask}
-                              userId={userId}
-                            />
+                            <Task task={task} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} userId="wife" />
                           </div>
                         )}
                       </Draggable>
@@ -106,20 +128,14 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="list-group">
                     {completedTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                      <Draggable key={task._id} draggableId={task._id} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            <Task
-                              task={task}
-                              handleMoveTask={handleMoveTask}
-                              handleEditTask={handleEditTask}
-                              handleDeleteTask={handleDeleteTask}
-                              userId={userId}
-                            />
+                            <Task task={task} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} userId="wife" />
                           </div>
                         )}
                       </Draggable>
@@ -132,13 +148,6 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
           </div>
         </div>
       </div>
-      {userId === 'wife' && (
-        <div className="row mt-5">
-          <div className="col-12">
-            <button className="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">Add Task</button>
-          </div>
-        </div>
-      )}
       <div className="modal fade" id="addTaskModal" tabIndex={-1} role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
@@ -152,15 +161,15 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
               <form>
                 <div className="form-group">
                   <label>Title</label>
-                  <input type="text" className="form-control" id="title" />
+                  <input type="text" className="form-control" name="title" value={newTask.title} onChange={handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea className="form-control" id="description" />
+                  <textarea className="form-control" name="description" value={newTask.description} onChange={handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>Stress Level</label>
-                  <select className="form-control" id="stressLevel">
+                  <select className="form-control" name="stressLevel" value={newTask.stressLevel} onChange={handleSelectChange}>
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="High">High</option>
@@ -168,13 +177,13 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, userId, userRole, handleMove
                 </div>
                 <div className="form-group">
                   <label>Due Date</label>
-                  <input type="date" className="form-control" id="dueDate" />
+                  <input type="date" className="form-control" name="dueDate" value={newTask.dueDate} onChange={handleInputChange} />
                 </div>
               </form>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" id="addTaskButton">Add Task</button>
+              <button type="button" className="btn btn-primary" onClick={handleAddTaskClick}>Add Task</button>
             </div>
           </div>
         </div>
