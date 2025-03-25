@@ -1,18 +1,18 @@
-import { Schema, model, type Document } from 'mongoose';
+import { Schema, Document } from 'mongoose';
 
 export interface TaskDocument extends Document {
-  taskId: string;
   title: string;
   description: string;
   stressLevel: string;
+  dueDate: Date;
 }
 
 const taskSchema = new Schema<TaskDocument>({
-  description: {
+  title: {
     type: String,
     required: true,
   },
-  taskId: {
+  description: {
     type: String,
     required: true,
   },
@@ -20,8 +20,8 @@ const taskSchema = new Schema<TaskDocument>({
     type: String,
     required: true,
   },
-  title: {
-    type: String,
+  dueDate: {
+    type: Date,
     required: true,
   }
 });
