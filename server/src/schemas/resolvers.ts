@@ -1,33 +1,19 @@
-import User, { UserDocument } from '../models/User';
-import Tasks, {TaskDocument} from '../models/Task'
-import { signToken } from '../services/auth';
+import User, { UserDocument } from '../models/user.js';
+import { TaskDocument} from '../models/Task.js'
+import { signToken } from '../services/auth.js';
 
-// interface Profile {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   password: string;
-//   skills: string[];
-// }
+import { GraphQLError } from 'graphql';
 
-// interface AddSkillArgs {
-//   profileId: string;
-//   skill: string;
-// }
+const AuthenticationError = new GraphQLError('Authentication error');
 
-// interface RemoveSkillArgs {
-//   profileId: string;
-//   skill: string;
-// }
 
 interface User{
+  _id: unknown;
   username: string;
   email: string;
-  password: string;
   // passwordWife: string;
   // passwordHusband: string;
-  wife: boolean;
-  savedTasks: Task[];
+  savedTasks: TaskDocument[];
 }
 
 //Tasks are not needed when the user is created
@@ -35,71 +21,105 @@ interface AddUserArgs {
   input:{
     username: string;
     email: string;
-    password: string;
+    // password: string;
+    passwordWife: string;
+    passwordHusband: string;
   }
 }
 
-interface Task {
-  title: string;
-  description: string;
-  stressLevel: string,
-  taskId: string;
-}
+// interface Task {
+//   _id: string;
+//   title: string;
+//   description: string;
+//   stressLevel: string,
+//   taskId: string;
+//   status: string;
+// }
 
-interface UserArgs {
-  userId: string;
-}
+// interface UserArgs {
+//   userId: string;
+// }
 
 interface Context {
-  user?: User;
+  user?: {
+    _id: unknown;
+    username: string;
+    email: string;
+    wife: boolean;
+  };
 }
 
+interface AddTaskArgs {
+  task: TaskDocument;
+}
+
+interface UpdateTaskArgs {
+  userId: string;
+  task: string;
+}
+
+interface RemoveTaskArgs {
+  userId: string;
+  task: string;
+}
 
 const resolvers = {
   Query: {
-    profiles: async (): Promise<User[]> => {
-      return await User.find();
-    },
-    profile: async (_parent: any, { userId }: UserArgs): Promise<User | null> => {
-      return await User.findOne({ _id: userId });
-    },
     me: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
         return await User.findOne({ _id: context.user._id });
       }
       throw AuthenticationError;
     },
+    //No need to query "tasks", they are already in the 'me' query
   },
   Mutation: {
     addProfile: async (_parent: any, { input }: AddUserArgs): Promise<{ token: string; user: User }> => {
       const user = await User.create({ ...input });
-      const token = signToken(user.username, user.email, user._id, );
+      const token = signToken(user.username, user.email, user._id, true);
       return { token, user };
     },
     login: async (_parent: any, { email, password }: { email: string; password: string }): Promise<{ token: string; user: User }> => {
       const user = await User.findOne({ email });
       if (!user) {
-        throw AuthenticationError;
+        throw new GraphQLError('User not found');
       }
 
-      const isPasswordHusband = await user.isPasswordHusband(password);
-      const isPasswordWife = await user.isPasswordWife(password);
+      const isWife = await user.isPasswordWife(password);
+      const isHusband = await user.isPasswordHusband(password);
 
-      if (!isPasswordHusband && !isPasswordWife) {
-        throw AuthenticationError;
+      console.log(isWife)
+
+      console.log(isHusband)
+
+      if(!isWife && !isHusband) {
+        throw new GraphQLError('Invalid password');
       }
 
-      const token = signToken(profile.name, profile.email, profile._id, isPasswordWife);
-      return { token, profile };
+      let token;
+
+      if (isWife) {
+        token = signToken(user.username, user.email, user._id, true);
+      } else {
+        token = signToken(user.username, user.email, user._id, false);
+      }
+
+      return { token, user };
     },
-    addTask: async (_parent: any, { profileId, skill }: AddSkillArgs, context: Context): Promise<Profile | null> => {
+    addTask: async (_parent: any, { task }: AddTaskArgs, context: Context): Promise<User | null> => {
+      console.log("Add Task start point " + context.user);
+      
       if (context.user) {
-
+        console.log("Signed in?");
+        
         if(context.user.wife) {
-          return await Profile.findOneAndUpdate(
-            { _id: profileId },
+          console.log("Signed in as wife");
+          // const newTask = new Task(task);
+          // await newTask.save();
+          return await User.findOneAndUpdate(
+            { _id: context.user._id },
             {
-              $addToSet: { skills: skill },
+              $addToSet: { savedTasks: task },
             },
             {
               new: true,
@@ -107,28 +127,51 @@ const resolvers = {
             }
           );
         } else {
-
+          throw new GraphQLError('Only the wife can create task');
         }
-        
       }
-      throw AuthenticationError;
+      throw new GraphQLError('You need to be logged in!');
     },
-    removeProfile: async (_parent: any, _args: any, context: Context): Promise<Profile | null> => {
-      if (context.user) {
-        return await Profile.findOneAndDelete({ _id: context.user._id });
-      }
-      throw AuthenticationError;
-    },
-    removeSkill: async (_parent: any, { skill }: RemoveSkillArgs, context: Context): Promise<Profile | null> => {
-      if (context.user) {
-        return await Profile.findOneAndUpdate(
-          { _id: context.user._id },
-          { $pull: { skills: skill } },
-          { new: true }
-        );
-      }
-      throw AuthenticationError;
-    },
+    // updateTask: async (_parent: any, { task }: UpdateTaskArgs, context: Context): Promise<User | null> => {
+    //   if (context.user) {
+    //     if(context.user.wife) {
+    //       return await User.findOneAndUpdate(
+    //         { _id: context.user._id },
+    //         { $pull: { tasks: task } },
+    //         { new: true }
+    //       );
+    //     }
+    //     else {
+    //       return await User.findOneAndUpdate(
+    //         { _id: context.user._id },
+    //         { $set: { 'tasks.$[elem].status': Task.status } }, // Assuming task has a status field
+    //         {
+    //           new: true,
+    //           arrayFilters: [{ 'elem._id': Task._id }],
+    //         }
+    //       );
+    //     }
+    //   }
+    //   throw AuthenticationError;
+    // },
+    // deleteTask: async (_parent: any, { task }: RemoveTaskArgs, context: Context): Promise<User | null> => {
+    //   if (context.user) {
+    //     if(context.user.wife) {
+    //       return await User.findOneAndDelete({ _id: task._id });
+    //     } else {
+    //       throw new GraphQLError('Only the wife can delete task');
+    //     }
+    //   }
+    //   throw AuthenticationError;
+    // },
+    // // Maybe not needed - Keeping just in case.
+    // // At this time, we do not have a remove profile functionality.
+    // removeProfile: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
+    //   if (context.user) {
+    //     return await User.findOneAndDelete({ _id: context.user._id });
+    //   }
+    //   throw AuthenticationError;
+    // },
   },
 };
 
