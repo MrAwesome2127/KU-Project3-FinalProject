@@ -27,19 +27,6 @@ interface AddUserArgs {
   }
 }
 
-// interface Task {
-//   _id: string;
-//   title: string;
-//   description: string;
-//   stressLevel: string,
-//   taskId: string;
-//   status: string;
-// }
-
-// interface UserArgs {
-//   userId: string;
-// }
-
 interface Context {
   user?: {
     _id: unknown;
@@ -73,12 +60,6 @@ interface RemoveTaskArgs {
 
 const resolvers = {
   Query: {
-    // profiles: async (): Promise<User[]> => {
-    //   return await User.find();
-    // },
-    // profile: async (_parent: any, { userId }: UserArgs): Promise<User | null> => {
-    //   return await User.findOne({ _id: userId });
-    // },
     me: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
         return await User.findOne({ _id: context.user._id });
