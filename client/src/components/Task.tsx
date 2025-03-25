@@ -1,29 +1,14 @@
-// Task.tsx
-import React from'react';
-
-interface TaskDocument {
-  id: string;
-  taskId: string;
-  title: string;
-  description: string;
-  stressLevel: string;
-  dueDate: Date;
-  column: string;
-}
+import React from 'react';
+import { TaskDocument } from '../models/TaskDocument';
 
 interface TaskProps {
   task: TaskDocument;
-  handleMoveTask: (task: TaskDocument, toColumn: 'new' | 'inProgress' | 'completed') => void;
   handleEditTask: (task: TaskDocument) => void;
   handleDeleteTask: (task: TaskDocument) => void;
   userId: string;
 }
 
-const Task: React.FC<TaskProps> = ({ task, handleMoveTask, handleEditTask, handleDeleteTask, userId }) => {
-  const handleMove = (toColumn: 'new' | 'inProgress' | 'completed') => {
-    handleMoveTask(task, toColumn);
-  };
-
+const Task: React.FC<TaskProps> = ({ task, handleEditTask, handleDeleteTask, userId }) => {
   const dueDateColor = () => {
     const today = new Date();
     const dueDate = task.dueDate;
@@ -31,9 +16,9 @@ const Task: React.FC<TaskProps> = ({ task, handleMoveTask, handleEditTask, handl
     const diffTime = dueDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays > 7) {
+    if (diffDays > 1) {
       return 'bg-success'; // Green
-    } else if (diffDays > 0) {
+    } else if (diffDays >= 0) {
       return 'bg-warning'; // Yellow
     } else {
       return 'bg-danger'; // Red
@@ -48,9 +33,10 @@ const Task: React.FC<TaskProps> = ({ task, handleMoveTask, handleEditTask, handl
           <p className="card-text">{task.description}</p>
           <p className="card-text">Stress Level: {task.stressLevel}</p>
           <p className="card-text">Due Date: {task.dueDate.toDateString()}</p>
+          <p className="card-text">Status: {task.status}</p> {/* Add this line */}
           {userId === 'wife' && (
             <div>
-              <button className="btn btn-primary" onClick={() => handleEditTask(task)}>Edit</button>
+              <button className="btn btn-primary" data-toggle="modal" data-target="#editTaskModal" onClick={() => handleEditTask(task)}>Edit</button>
               <button className="btn btn-danger" onClick={() => handleDeleteTask(task)}>Delete</button>
             </div>
           )}
