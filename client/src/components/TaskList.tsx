@@ -9,6 +9,7 @@ interface TaskListProps {
   handleAddTask: (newTask: TaskDocument) => void;
   handleDeleteTask: (task: TaskDocument) => void;
   handleEditTask: (editedTask: TaskDocument) => void;
+  role: string;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -16,6 +17,7 @@ const TaskList: React.FC<TaskListProps> = ({
   handleAddTask,
   handleDeleteTask,
   handleEditTask,
+  role
 }) => {
   const [newTask, setNewTask] = useState({
     title: '',
@@ -60,11 +62,21 @@ const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <div>
-      <div className="text-center mb-5">
+      
+    {
+      role == "Wife" ?
+      (
+        <div className="text-center mb-5">
         <button className="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
           Add Task
         </button>
       </div>
+      ) : (
+        null
+      )
+    }
+
+
       <div className="row">
         <div className="col-4">
           <h2 className="text-center">New</h2>
