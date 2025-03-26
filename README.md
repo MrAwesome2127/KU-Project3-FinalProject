@@ -14,6 +14,10 @@ Have you ever had a list of tasks that you cannot seem to get your husband to do
 
 ## Installation
 How to run locally:
+Client side:
+npm run dev
+
+Server side:
 1. npm install 
 2. npm run build 
 3. npm run seed
