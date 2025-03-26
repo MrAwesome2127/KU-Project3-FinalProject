@@ -3,6 +3,7 @@ import { TaskDocument} from '../models/Task.js'
 import { signToken } from '../services/auth.js';
 
 import { GraphQLError } from 'graphql';
+import e from 'express';
 
 const AuthenticationError = new GraphQLError('Authentication error');
 
@@ -54,6 +55,11 @@ interface TaskArgs {
 }
 
 interface UpdateTaskArgs {
+  task: TaskDocument;
+  taskId: string;
+}
+
+interface deleteTaskArgs {
   task: TaskDocument;
   taskId: string;
 }
@@ -131,59 +137,72 @@ const resolvers = {
     },
     updateTask: async (_parent: any, { task, taskId }: UpdateTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
-        // if(context.user.wife && !task.statusTask) {
-          
-          const targetUser = await User.findOneAndUpdate(
-            { _id: context.user.id },
-            { $pull: { savedTasks: {_id: taskId}} },
+
+          const targetUser = await User.findById(
+            context.user.id 
           );
 
-          const removedTask = targetUser?.savedTasks.find((task: TaskDocument) => task.id.toString() === taskId);
-
-          let newTask: any = removedTask;
-
-          if(context.user.wife) {
-            newTask = {
-              ...removedTask,
-              title: task.title,
-              description: task.description,
-              stressLevel: task.stressLevel,
-              dueDate: task.dueDate,
-            };
-          } else {
-            newTask = {
-              ...removedTask,
-              statusTask: task.statusTask,
-            };
+          if (!targetUser) {
+            throw new GraphQLError('User not found');
           }
 
-          const updateUserTask = await User.findOneAndUpdate(
-            { _id: context.user.id },
-            { $addToSet: { savedTasks: newTask} },
-            { new: true }
-          );
-        return updateUserTask;
+          const updateTaskIndex = targetUser?.savedTasks.findIndex((task: TaskDocument) => task.id.toString() === taskId);
+          if (updateTaskIndex === -1) {
+            throw new GraphQLError('Task not found');
+          }
+
+          if(context.user.wife) {
+            targetUser.savedTasks[updateTaskIndex].title = task.title;
+            targetUser.savedTasks[updateTaskIndex].description = task.description;
+            targetUser.savedTasks[updateTaskIndex].stressLevel = task.stressLevel;
+            targetUser.savedTasks[updateTaskIndex].dueDate = task.dueDate;
+          } else {
+            throw new GraphQLError('Only the wife can update the task status');
+          }
+
+          // TODO: Unable to get GraphQL to accept the statusTask, "Property statusTask is not allowed."
+          if(!context.user.wife) {
+            targetUser.savedTasks[updateTaskIndex].statusTask = task.statusTask;
+          } else {
+            throw new GraphQLError('Only the husband can update task status');
+          }
+          
+          await targetUser.save()
+          
+        return targetUser;
       }
       throw AuthenticationError;
     },
-    // deleteTask: async (_parent: any, { task }: TaskArgs, context: Context): Promise<User | null> => {
-    //   if (context.user) {
-    //     if(context.user.wife) {
-    //       return await User.findOneAndDelete({ _id: task._id });
-    //     } else {
-    //       throw new GraphQLError('Only the wife can delete task');
-    //     }
-    //   }
-    //   throw AuthenticationError;
-    // },
-    // // Maybe not needed - Keeping just in case.
-    // // At this time, we do not have a remove profile functionality.
-    // removeProfile: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
-    //   if (context.user) {
-    //     return await User.findOneAndDelete({ _id: context.user._id });
-    //   }
-    //   throw AuthenticationError;
-    // },
+    deleteTask: async (_parent: any, { task, taskId }: deleteTaskArgs, context: Context): Promise<User | null> => {
+      if (context.user) {
+
+        const targetUser = await User.findById(
+          context.user.id 
+        );
+
+        if (!targetUser) {
+          throw new GraphQLError('User not found');
+        }
+
+        const deleteTaskIndex = targetUser?.savedTasks.findIndex((task: TaskDocument) => task.id.toString() === taskId);
+        if (deleteTaskIndex === -1) {
+          throw new GraphQLError('Task not found');
+        }
+
+        // TODO: Cannot read properties of undefined (reading 'title')
+        if(context.user.wife) {
+          targetUser.savedTasks[deleteTaskIndex].title = task.title;
+          targetUser.savedTasks[deleteTaskIndex].description = task.description;
+          targetUser.savedTasks[deleteTaskIndex].stressLevel = task.stressLevel;
+          targetUser.savedTasks[deleteTaskIndex].dueDate = task.dueDate;
+          targetUser.savedTasks[deleteTaskIndex].statusTask = task.statusTask;
+        } else {
+          throw new GraphQLError('Only the wife can delete a task');
+        }
+        await targetUser.save()
+      }
+      throw AuthenticationError;
+    }
   },
 };
 
