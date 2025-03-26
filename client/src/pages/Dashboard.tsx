@@ -100,12 +100,12 @@ function Dashboard() {
         <h2>Welcome, user!</h2>
 
         <p>Role: {role}</p>
-
+        
 
       <DragDropContext onDragEnd={onDragEnd}>
       <TaskList tasks={tasks} handleAddTask={handleAddTask} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} role={role} />
     </DragDropContext>
-    
+    <div/>
     
     
     </>
