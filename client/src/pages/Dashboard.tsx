@@ -1,13 +1,40 @@
-import React, { useState } from'react';
+import React, { useState, useEffect } from'react';
 import TaskList from '../components/TaskList';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { TaskDocument } from '../models/TaskDocument';
 import { DragDropContext } from'react-beautiful-dnd';
 
+import auth from '../utils/auth';
+
 type Status = 'new' | 'inProgress' | 'completed';
 
 function Dashboard() {
+
+  if(!auth.loggedIn()) {
+    return <h2>YOU MUST BE LOGGED IN TO ACCESS THIS PAGE</h2>
+  }
+
+
+
+  const [role, setRole] = useState("");
+  // CAN only be Wife or Husband
+
   const [tasks, setTasks] = useState<TaskDocument[]>([]);
+
+
+  useEffect(() => {
+    const data: any = auth.getProfile();
+
+    console.log(data)
+
+    if(data?.wife == true) {
+      setRole("Wife")
+    } else {
+      setRole("Husband")
+    }
+
+  }, [])
+
 
   const handleAddTask = (newTask: TaskDocument) => {
     setTasks((prevTasks) => {
@@ -69,9 +96,19 @@ function Dashboard() {
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <TaskList tasks={tasks} handleAddTask={handleAddTask} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} />
+    <>
+        <h2>Welcome, user!</h2>
+
+        <p>Role: {role}</p>
+
+
+      <DragDropContext onDragEnd={onDragEnd}>
+      <TaskList tasks={tasks} handleAddTask={handleAddTask} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} role={role} />
     </DragDropContext>
+    
+    
+    
+    </>
   );
 }
 
