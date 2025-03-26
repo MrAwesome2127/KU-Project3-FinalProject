@@ -17,6 +17,8 @@ const typeDefs = `
         title: String
         description: String
         stressLevel: String
+        dueDate: String
+        statusTask: String
     }
 
     type Auth {
@@ -36,6 +38,7 @@ const typeDefs = `
         description: String
         stressLevel: String
         dueDate: String
+        statusTask: String
     }
 
     type Query {
@@ -46,6 +49,7 @@ const typeDefs = `
         addProfile(input: AddUserArgs): Auth
         login(email: String!, password: String!): Auth
         addTask(task: AddTaskArgs): User
+        updateTask(taskId: String!, task: AddTaskArgs): User
     }
 `
 

@@ -5,6 +5,7 @@ export interface TaskDocument extends Document {
   description: string;
   stressLevel: string;
   dueDate: Date;
+  statusTask: string;
 }
 
 const taskSchema = new Schema<TaskDocument>({
@@ -23,6 +24,11 @@ const taskSchema = new Schema<TaskDocument>({
   dueDate: {
     type: Date,
     required: true,
+  },
+  statusTask: {
+    type: String,
+    enum: ['new', 'inProgress', 'completed'],
+    default: 'new',
   }
 });
 

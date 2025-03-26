@@ -42,32 +42,27 @@ interface AddUserArgs {
 
 interface Context {
   user?: {
-    _id: unknown;
+    id: unknown;
     username: string;
     email: string;
     wife: boolean;
   };
 }
 
-interface AddTaskArgs {
+interface TaskArgs {
   task: TaskDocument;
 }
 
 interface UpdateTaskArgs {
-  userId: string;
-  task: string;
-}
-
-interface RemoveTaskArgs {
-  userId: string;
-  task: string;
+  task: TaskDocument;
+  taskId: string;
 }
 
 const resolvers = {
   Query: {
     me: async (_parent: any, _args: any, context: Context): Promise<User | null> => {
       if (context.user) {
-        return await User.findOne({ _id: context.user._id });
+        return await User.findOne({ _id: context.user.id });
       }
       throw AuthenticationError;
     },
@@ -106,7 +101,7 @@ const resolvers = {
 
       return { token, user };
     },
-    addTask: async (_parent: any, { task }: AddTaskArgs, context: Context): Promise<User | null> => {
+    addTask: async (_parent: any, { task }: TaskArgs, context: Context): Promise<User | null> => {
       console.log("Add Task start point " + context.user);
       
       if (context.user) {
@@ -116,8 +111,8 @@ const resolvers = {
           console.log("Signed in as wife");
           // const newTask = new Task(task);
           // await newTask.save();
-          return await User.findOneAndUpdate(
-            { _id: context.user._id },
+          const target = await User.findOneAndUpdate(
+            { _id: context.user.id },
             {
               $addToSet: { savedTasks: task },
             },
@@ -126,35 +121,52 @@ const resolvers = {
               runValidators: true,
             }
           );
+          console.log("Task added to user " + target);
+          return target;
         } else {
           throw new GraphQLError('Only the wife can create task');
         }
       }
       throw new GraphQLError('You need to be logged in!');
     },
-    // updateTask: async (_parent: any, { task }: UpdateTaskArgs, context: Context): Promise<User | null> => {
-    //   if (context.user) {
-    //     if(context.user.wife) {
-    //       return await User.findOneAndUpdate(
-    //         { _id: context.user._id },
-    //         { $pull: { tasks: task } },
-    //         { new: true }
-    //       );
-    //     }
-    //     else {
-    //       return await User.findOneAndUpdate(
-    //         { _id: context.user._id },
-    //         { $set: { 'tasks.$[elem].status': Task.status } }, // Assuming task has a status field
-    //         {
-    //           new: true,
-    //           arrayFilters: [{ 'elem._id': Task._id }],
-    //         }
-    //       );
-    //     }
-    //   }
-    //   throw AuthenticationError;
-    // },
-    // deleteTask: async (_parent: any, { task }: RemoveTaskArgs, context: Context): Promise<User | null> => {
+    updateTask: async (_parent: any, { task, taskId }: UpdateTaskArgs, context: Context): Promise<User | null> => {
+      if (context.user) {
+        // if(context.user.wife && !task.statusTask) {
+          
+          const targetUser = await User.findOneAndUpdate(
+            { _id: context.user.id },
+            { $pull: { savedTasks: {_id: taskId}} },
+          );
+
+          const removedTask = targetUser?.savedTasks.find((task: TaskDocument) => task.id.toString() === taskId);
+
+          let newTask: any = removedTask;
+
+          if(context.user.wife) {
+            newTask = {
+              ...removedTask,
+              title: task.title,
+              description: task.description,
+              stressLevel: task.stressLevel,
+              dueDate: task.dueDate,
+            };
+          } else {
+            newTask = {
+              ...removedTask,
+              statusTask: task.statusTask,
+            };
+          }
+
+          const updateUserTask = await User.findOneAndUpdate(
+            { _id: context.user.id },
+            { $addToSet: { savedTasks: newTask} },
+            { new: true }
+          );
+        return updateUserTask;
+      }
+      throw AuthenticationError;
+    },
+    // deleteTask: async (_parent: any, { task }: TaskArgs, context: Context): Promise<User | null> => {
     //   if (context.user) {
     //     if(context.user.wife) {
     //       return await User.findOneAndDelete({ _id: task._id });
