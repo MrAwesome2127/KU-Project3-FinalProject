@@ -50,6 +50,7 @@ const typeDefs = `
         login(email: String!, password: String!): Auth
         addTask(task: AddTaskArgs): User
         updateTask(taskId: String!, task: AddTaskArgs): User
+        deleteTask(taskId: String!): User
     }
 `
 
