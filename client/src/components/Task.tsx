@@ -3,15 +3,23 @@ import { TaskDocument } from '../models/TaskDocument';
 
 interface TaskProps {
   task: TaskDocument;
-  handleEditTask: (task: TaskDocument) => void;
-  handleDeleteTask: (task: TaskDocument) => void;
+  // handleEditTask: (task: TaskDocument) => void;
+  // handleDeleteTask: (task: TaskDocument) => void;
   userId: string;
 }
 
-const Task: React.FC<TaskProps> = ({ task, handleEditTask, handleDeleteTask, userId }) => {
+const Task: React.FC<TaskProps> = ({ 
+  task, 
+  // handleEditTask, 
+  // handleDeleteTask, 
+  userId
+ }) => {
   const dueDateColor = () => {
     const today = new Date();
-    const dueDate = task.dueDate;
+    const parsedDueDate = parseInt(task.dueDate)
+    const dueDate = new Date(parsedDueDate);
+
+    console.log(dueDate)
 
     const diffTime = dueDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -32,8 +40,8 @@ const Task: React.FC<TaskProps> = ({ task, handleEditTask, handleDeleteTask, use
           <h5 className="card-title">{task.title}</h5>
           <p className="card-text">{task.description}</p>
           <p className="card-text">Stress Level: {task.stressLevel}</p>
-          <p className="card-text">Due Date: {task.dueDate.toDateString()}</p>
-          <p className="card-text">Status: {task.status}</p> {/* Add this line */}
+          <p className="card-text">Due Date: {new Date(parseInt(task.dueDate)).toDateString()}</p>
+          <p className="card-text">Status: {task.statusTask}</p> {/* Add this line */}
           {userId === 'wife' && (
             <div>
               <button className="btn btn-primary" data-toggle="modal" data-target="#editTaskModal" onClick={() => handleEditTask(task)}>Edit</button>

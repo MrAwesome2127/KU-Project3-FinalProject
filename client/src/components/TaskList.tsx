@@ -5,18 +5,21 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { TaskDocument } from '../models/TaskDocument';
 
 interface TaskListProps {
-  tasks: TaskDocument[];
+  taskData: TaskDocument[];
   handleAddTask: (newTask: TaskDocument) => void;
-  handleDeleteTask: (task: TaskDocument) => void;
-  handleEditTask: (editedTask: TaskDocument) => void;
+  // handleDeleteTask: (task: TaskDocument) => void;
+  // handleEditTask: (editedTask: TaskDocument) => void;
   role: string;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
-  tasks,
+  taskData,
   handleAddTask,
-  handleDeleteTask,
-  handleEditTask,
+  // Tim, uncomment with Joem
+  //- Ryan
+  
+  // handleDeleteTask,
+  // handleEditTask,
   role
 }) => {
   const [newTask, setNewTask] = useState({
@@ -37,14 +40,14 @@ const TaskList: React.FC<TaskListProps> = ({
   };
 
   const handleAddTaskClick = () => {
-    if (newTask.title && newTask.description && newTask.dueDate) {
+    if (newTask.title && newTask.description && newTask.dueDate && newTask.stressLevel) {
       const task: TaskDocument = {
         title: newTask.title,
         description: newTask.description,
         stressLevel: newTask.stressLevel,
-        _id: Math.random().toString(36).substr(2, 9),
-        dueDate: new Date(newTask.dueDate),
-        status: 'new', // Set default status to 'new'
+        // _id: Math.random().toString(36).substr(2, 9),
+        dueDate: newTask.dueDate,
+        statusTask: 'new', // Set default status to 'new'
       };
       handleAddTask(task);
       setNewTask({
@@ -53,12 +56,32 @@ const TaskList: React.FC<TaskListProps> = ({
         stressLevel: 'Low',
         dueDate: '',
       });
+      closeModal()
     }
   };
 
-  const newTasks = tasks.filter((task) => task.status === 'new');
-  const inProgressTasks = tasks.filter((task) => task.status === 'inProgress');
-  const completedTasks = tasks.filter((task) => task.status === 'completed');
+  function showModal () {
+      const targetModal = document.getElementById("addTaskModal")
+
+      if(targetModal) {
+        targetModal.style.display = "block"
+        targetModal.style.backgroundColor = "rgba(0,0,0,0.7)"
+      }
+ 
+  }
+
+  function closeModal () {
+      const targetModal = document.getElementById("addTaskModal")
+
+      if(targetModal) {
+        targetModal.style.display = "none"
+      }
+
+  }
+
+  const newTasks = taskData.filter((task) => task.statusTask === 'new');
+  const inProgressTasks = taskData.filter((task) => task.statusTask === 'inProgress');
+  const completedTasks = taskData.filter((task) => task.statusTask === 'completed');
 
   return (
     <div>
@@ -67,7 +90,9 @@ const TaskList: React.FC<TaskListProps> = ({
           role == "Wife"?
           (
             <div className="text-center mb-5">
-              <button className="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
+              <button 
+              onClick={showModal}
+              className="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
                 Add Task
               </button>
             </div>
@@ -75,14 +100,11 @@ const TaskList: React.FC<TaskListProps> = ({
             null
           )
         }
-        <div className="modal fade" id="addTaskModal" tabIndex={-1} role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+        <div className="modal" id="addTaskModal" tabIndex={-1} role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id="addTaskModalLabel">Add Task</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
               </div>
               <div className="modal-body">
                 <form>
@@ -109,7 +131,9 @@ const TaskList: React.FC<TaskListProps> = ({
                 </form>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button 
+                  onClick={closeModal}
+                type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" className="btn btn-primary" onClick={handleAddTaskClick}>Add Task</button>
               </div>
             </div>
@@ -125,7 +149,7 @@ const TaskList: React.FC<TaskListProps> = ({
                 <Droppable droppableId="new">
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.droppableProps} className="list-group">
-                      {newTasks.map((task, index) => (
+                      {newTasks.map((task: any, index) => (
                         <Draggable key={task._id} draggableId={task._id} index={index}>
                           {(provided) => (
                             <div
@@ -133,7 +157,12 @@ const TaskList: React.FC<TaskListProps> = ({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              <Task task={task} handleDeleteTask={handleDeleteTask} handleEditTask={handleEditTask} userId="wife" />
+                              <Task 
+                              task={task} 
+                              handleDeleteTask={handleDeleteTask} 
+                              handleEditTask={handleEditTask} 
+                              userId="wife" 
+                              />
                             </div>
                           )}
                         </Draggable>
@@ -180,7 +209,7 @@ const TaskList: React.FC<TaskListProps> = ({
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.droppableProps} className="list-group">
                       {completedTasks.map((task, index) => (
-                        <Draggable key={task._id} draggableId={task._id} index={index}>
+                        <Draggable key={task.id} draggableId={task._id} index={index}>
                           {(provided) => (
                             <div
                               ref={provided.innerRef}
