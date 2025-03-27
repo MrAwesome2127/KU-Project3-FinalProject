@@ -31,9 +31,13 @@ Team effort of Tim Velasquez, Ryan Bednar, and Nathan Ebbesen
 ## Testing
 Testing can be done via the graphql interface from localhost:3001/graphql
 
+## Deployed App
+
+https://ku-project3-finalproject.onrender.com
+
 ## Questions
 If you have any questions, please reach out to anyone on our team: <br />
 Nathan Ebbesen [Nathan.R.Ebbesen@hotmail.com](mailto:Nathan.R.Ebbesen@hotmail.com), <br />
 Ryan Bednar [Rbednar01@gmail.com](mailto:Rbednar01@gmail.com),<br />
-Tim Velasquez [tim@wanderingtinyhomes.com](mailto:tim@wanderingtinyhomes.com)<br />
+Tim Velasquez [timmyv1031@gmail.com](mailto:timmyv1031@gmail.com)<br />
 You can find our GitHub repo at: https://github.com/MrAwesome2127/KU-Project3-FinalProject
