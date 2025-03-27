@@ -138,42 +138,43 @@ const resolvers = {
     updateTask: async (_parent: any, { task, taskId }: UpdateTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
 
-          const targetUser = await User.findById(
-            context.user.id 
-          );
+        const targetUser = await User.findById(
+          context.user.id 
+        );
 
-          if (!targetUser) {
-            throw new GraphQLError('User not found');
-          }
+        if (!targetUser) {
+          throw new GraphQLError('User not found');
+        }
 
-          const updateTaskIndex = targetUser?.savedTasks.findIndex((task: TaskDocument) => task.id.toString() === taskId);
-          if (updateTaskIndex === -1) {
-            throw new GraphQLError('Task not found');
-          }
+        const updateTaskIndex = targetUser?.savedTasks.findIndex((task: TaskDocument) => task.id.toString() === taskId);
+        if (updateTaskIndex === -1) {
+          throw new GraphQLError('Task not found');
+        }
 
-          if(context.user.wife) {
-            targetUser.savedTasks[updateTaskIndex].title = task.title;
-            targetUser.savedTasks[updateTaskIndex].description = task.description;
-            targetUser.savedTasks[updateTaskIndex].stressLevel = task.stressLevel;
-            targetUser.savedTasks[updateTaskIndex].dueDate = task.dueDate;
-          } else {
-            throw new GraphQLError('Only the wife can update the task status');
-          }
+        if(context.user.wife) {
+          targetUser.savedTasks[updateTaskIndex].title = task.title;
+          targetUser.savedTasks[updateTaskIndex].description = task.description;
+          targetUser.savedTasks[updateTaskIndex].stressLevel = task.stressLevel;
+          targetUser.savedTasks[updateTaskIndex].dueDate = task.dueDate;
+        } else if (!task.statusTask) {
+          throw new GraphQLError('Only the wife can update the task status');
+        }
 
-          // TODO: Unable to get GraphQL to accept the statusTask, "Property statusTask is not allowed."
-          if(!context.user.wife) {
-            targetUser.savedTasks[updateTaskIndex].statusTask = task.statusTask;
-          } else {
-            throw new GraphQLError('Only the husband can update task status');
-          }
-          
-          await targetUser.save()
+        if(!context.user.wife) {
+          targetUser.savedTasks[updateTaskIndex].statusTask = task.statusTask;
+        } else {
+          // throw new GraphQLError('Only the husband can update task status');
+          targetUser.savedTasks[updateTaskIndex].statusTask = "new";
+
+        }
+        
+        await targetUser.save()
           
         return targetUser;
       }
       throw AuthenticationError;
     },
-    deleteTask: async (_parent: any, { task, taskId }: deleteTaskArgs, context: Context): Promise<User | null> => {
+    deleteTask: async (_parent: any, { taskId }: deleteTaskArgs, context: Context): Promise<User | null> => {
       if (context.user) {
 
         const targetUser = await User.findById(
@@ -189,17 +190,14 @@ const resolvers = {
           throw new GraphQLError('Task not found');
         }
 
-        // TODO: Cannot read properties of undefined (reading 'title')
         if(context.user.wife) {
-          targetUser.savedTasks[deleteTaskIndex].title = task.title;
-          targetUser.savedTasks[deleteTaskIndex].description = task.description;
-          targetUser.savedTasks[deleteTaskIndex].stressLevel = task.stressLevel;
-          targetUser.savedTasks[deleteTaskIndex].dueDate = task.dueDate;
-          targetUser.savedTasks[deleteTaskIndex].statusTask = task.statusTask;
+          const filteredTasks = targetUser.savedTasks.filter((task: TaskDocument) => task.id.toString() !== taskId);
+          targetUser.savedTasks = filteredTasks;
         } else {
           throw new GraphQLError('Only the wife can delete a task');
         }
         await targetUser.save()
+        return targetUser;
       }
       throw AuthenticationError;
     }
