@@ -163,7 +163,9 @@ const resolvers = {
         if(!context.user.wife) {
           targetUser.savedTasks[updateTaskIndex].statusTask = task.statusTask;
         } else {
-          throw new GraphQLError('Only the husband can update task status');
+          // throw new GraphQLError('Only the husband can update task status');
+          targetUser.savedTasks[updateTaskIndex].statusTask = "new";
+
         }
         
         await targetUser.save()
