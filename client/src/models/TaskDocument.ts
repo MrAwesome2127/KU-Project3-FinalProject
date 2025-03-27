@@ -1,8 +1,8 @@
 export interface TaskDocument {
-  _id: string;
+  // _id: string;
   title: string;
   description: string;
   stressLevel: string,
-  dueDate: Date;
-  status: 'new' | 'inProgress' | 'completed'; 
+  dueDate: string;
+  statusTask: 'new' | 'inProgress' | 'completed'; 
 }
